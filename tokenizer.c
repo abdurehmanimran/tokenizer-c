@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,8 +12,16 @@ typedef struct {
   char *text;
 } fileContent;
 
-fileContent *readFromFile(char *filePath);
+typedef char ***linesArray;
 
+typedef struct {
+  int len;
+  int capacity;
+  linesArray lines;
+} tokens;
+
+fileContent *readFromFile(char *filePath);
+void initFileContent(fileContent **content);
 void freeFileContent(fileContent *fileContent);
 
 int main(int argc, char **argv) {
@@ -41,6 +50,23 @@ void freeFileContent(fileContent *fileContent) {
   free(fileContent);
 }
 
+void initFileContent(fileContent **content) {
+  *content = (fileContent *)malloc(sizeof(fileContent));
+  (*content)->len = 0;
+  (*content)->capacity = INIT_CAPACITY;
+  (*content)->text = (char *)malloc(sizeof(char) * INIT_CAPACITY);
+}
+
+int readLine(FILE *file, char **buffer) {
+  char *line = (char *)malloc(sizeof(char) * MAX_LINE);
+  if (fgets(line, MAX_LINE, file) == NULL) {
+    free(line);
+    return 0;
+  }
+  *buffer = line;
+  return 1;
+}
+
 fileContent *readFromFile(char *filePath) {
   fileContent *textContent;
   // Opening a File for Reading
@@ -50,19 +76,12 @@ fileContent *readFromFile(char *filePath) {
     return NULL;
   } else {
     // Initializing the Content Struct
-    textContent = (fileContent *)malloc(sizeof(fileContent));
-    textContent->len = 0;
-    textContent->capacity = INIT_CAPACITY;
-    textContent->text = (char *)malloc(sizeof(char) * textContent->capacity);
-    // strcpy(textContent->text, "");
+    initFileContent(&textContent);
 
     // Reading the file line by line
     while (1) {
-      char *line = (char *)malloc(sizeof(char) * MAX_LINE);
-      if (fgets(line, MAX_LINE, file) == NULL) {
-        free(line);
-        break;
-      } else {
+      char *line;
+      if (readLine(file, &line)) {
         textContent->len += strlen(line);
         if (textContent->capacity > textContent->len)
           strcat(textContent->text, line);
@@ -80,8 +99,9 @@ fileContent *readFromFile(char *filePath) {
           }
           strcat(textContent->text, line);
         }
-      }
-      free(line);
+        free(line);
+      } else
+        break;
     }
   }
   return textContent;
