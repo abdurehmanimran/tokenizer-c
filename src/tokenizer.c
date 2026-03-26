@@ -1,26 +1,8 @@
+#include "tokenizer.h"
 #include "fileContent.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-typedef char *wordToken;
-// typedef wordToken *lineToken;
-
-typedef struct {
-  int n;
-  int capacity;
-  wordToken *words;
-} lineToken;
-// typedef lineToken *fileTokens;
-
-typedef struct {
-  int n;
-  int capacity;
-  lineToken *lines;
-} fileTokens;
-
-fileTokens *createTokens(fileContent content);
-void freeFileTokens(fileTokens *tokens);
 
 int main(int argc, char **argv) {
   fileContent *fileText;
@@ -42,7 +24,7 @@ int main(int argc, char **argv) {
 
   printf("» Content Length: %d\n» Content Capacity: %d\n", fileText->len,
          fileText->capacity);
-  tokens = createTokens(*fileText);
+  tokens = createFileTokens(*fileText);
   if (tokens != NULL)
     freeFileTokens(tokens);
 
@@ -153,7 +135,7 @@ void freeFileTokens(fileTokens *tokens) {
   free(tokens);
 }
 
-fileTokens *createTokens(fileContent content) {
+fileTokens *createFileTokens(fileContent content) {
   fileTokens *tokens;
   initFileTokens(&tokens, 16);
 
