@@ -8,6 +8,7 @@ void initFileContent(fileContent **content) {
   (*content)->len = 0;
   (*content)->capacity = INIT_CAPACITY;
   (*content)->text = (char *)malloc(sizeof(char) * INIT_CAPACITY);
+  (*content)->text[0] = '\0';
 }
 
 void freeFileContent(fileContent *fileContent) {
@@ -41,9 +42,11 @@ fileContent *readFromFile(char *filePath) {
       char *line;
       if (readLine(file, &line)) {
         textContent->len += strlen(line);
-        if (textContent->capacity > textContent->len)
+
+        // Only bigger cap is acceptable, not equal
+        if (textContent->capacity > textContent->len) {
           strcat(textContent->text, line);
-        else {
+        } else {
           textContent->capacity *= 2;
           char *temp;
           if ((temp = (char *)realloc(textContent->text,
